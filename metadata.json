@@ -1,0 +1,8 @@
+
+{
+  "name": "ImobGuard - Gestão de Rondas",
+  "description": "Uma plataforma completa para vigilantes gerenciarem rondas, registrarem incidentes e visualizarem o histórico de atividades em tempo real.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
