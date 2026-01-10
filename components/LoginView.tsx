@@ -61,7 +61,7 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
               <span className="font-normal">Imob</span>
               <span className="font-bold">Guard</span>
             </h1>
-            <p className="text-primary text-sm font-medium">
+            <p className="text-slate-800 text-sm font-medium">
               Avesta
             </p>
           </div>
@@ -83,7 +83,7 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
           {/* Campo E-mail */}
           <div className="flex flex-col gap-2">
             <label className="text-slate-700 text-sm font-semibold">E-mail</label>
-            <div className="flex w-full items-center gap-3 rounded-xl border border-slate-300 bg-white px-4 h-14 shadow-sm focus-within:border-primary transition-all">
+            <div className="flex w-full items-center gap-1 rounded-xl border border-slate-300 bg-white px-4 h-14 shadow-sm focus-within:border-primary transition-all">
               <span className="material-symbols-outlined text-[22px] text-slate-400">mail</span>
               <input
                 className="flex-1 w-full h-full bg-transparent text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-0 border-none text-base"
@@ -106,7 +106,7 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
                 Esqueceu a senha?
               </a>
             </div>
-            <div className="flex w-full items-center gap-3 rounded-xl border border-slate-300 bg-white px-4 h-14 shadow-sm focus-within:border-primary transition-all">
+            <div className="flex w-full items-center gap-1 rounded-xl border border-slate-300 bg-white px-4 h-14 shadow-sm focus-within:border-primary transition-all">
               <span className="material-symbols-outlined text-[22px] text-slate-400">lock</span>
               <input
                 className="flex-1 w-full h-full bg-transparent text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-0 border-none text-base"

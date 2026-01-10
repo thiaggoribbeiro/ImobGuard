@@ -1,7 +1,7 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Property } from '../types';
-import { PROPERTIES } from '../constants';
+import { supabase } from '../supabaseClient';
 
 interface PropertySelectionViewProps {
   onSelectProperty: (property: Property) => void;
@@ -10,6 +10,30 @@ interface PropertySelectionViewProps {
 }
 
 const PropertySelectionView: React.FC<PropertySelectionViewProps> = ({ onSelectProperty, isDarkMode, toggleTheme }) => {
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProperties = async () => {
+      try {
+        const { data, error: fetchError } = await supabase
+          .from('properties')
+          .select('*')
+          .order('name');
+
+        if (fetchError) throw fetchError;
+        setProperties(data || []);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProperties();
+  }, []);
+
   const getIcon = (type: Property['type']) => {
     switch (type) {
       case 'warehouse': return 'warehouse';
@@ -48,7 +72,7 @@ const PropertySelectionView: React.FC<PropertySelectionViewProps> = ({ onSelectP
             <span className="material-symbols-outlined text-slate-600 dark:text-white">menu</span>
           </button>
           <h2 className="text-lg font-bold leading-tight tracking-tight flex-1 text-center">Selecionar Imóvel</h2>
-          <button 
+          <button
             onClick={toggleTheme}
             className="flex size-10 shrink-0 items-center justify-center rounded-full bg-slate-100 dark:bg-surface-dark text-primary"
           >
@@ -60,8 +84,8 @@ const PropertySelectionView: React.FC<PropertySelectionViewProps> = ({ onSelectP
             <div className="flex items-center justify-center pl-4 pr-2 text-slate-400">
               <span className="material-symbols-outlined">search</span>
             </div>
-            <input 
-              className="flex w-full min-w-0 flex-1 bg-transparent border-none focus:ring-0 text-base font-medium placeholder:text-slate-400 text-slate-900 dark:text-white h-full px-0" 
+            <input
+              className="flex w-full min-w-0 flex-1 bg-transparent border-none focus:ring-0 text-base font-medium placeholder:text-slate-400 text-slate-900 dark:text-white h-full px-0"
               placeholder="Buscar imóvel..."
             />
             <button className="flex items-center justify-center pr-4 pl-2 text-primary">
@@ -84,36 +108,51 @@ const PropertySelectionView: React.FC<PropertySelectionViewProps> = ({ onSelectP
         </div>
 
         <div className="flex flex-col gap-4 px-4">
-          {PROPERTIES.map((property) => (
-            <div 
-              key={property.id} 
-              onClick={() => onSelectProperty(property)}
-              className={`group relative flex flex-col gap-2 rounded-2xl bg-white dark:bg-surface-dark p-5 shadow-sm border border-slate-100 dark:border-transparent active:scale-[0.98] transition-all cursor-pointer overflow-hidden`}
-            >
-              {property.status === 'active' && <div className="absolute top-0 left-0 w-1 h-full bg-red-500"></div>}
-              <div className="flex justify-between items-start">
-                <div className="flex items-center gap-4">
-                  <div className={`flex size-12 shrink-0 items-center justify-center rounded-xl ${getStatusColorClass(property.status)} shadow-sm`}>
-                    <span className="material-symbols-outlined text-[28px]">{property.status === 'active' ? 'warning' : getIcon(property.type)}</span>
-                  </div>
-                  <div>
-                    <h3 className="text-base font-bold text-slate-900 dark:text-white leading-tight">{property.name}</h3>
-                    <p className="text-sm text-slate-500 dark:text-text-secondary-dark mt-1 flex items-center gap-1">
-                      <span className="material-symbols-outlined text-xs">location_on</span>
-                      {property.address}
-                    </p>
-                  </div>
-                </div>
-                <span className="material-symbols-outlined text-slate-300 dark:text-slate-600">arrow_forward_ios</span>
-              </div>
-              <div className="flex items-center gap-2 mt-2 pl-16">
-                <span className={`inline-flex items-center rounded-lg px-2.5 py-1 text-[10px] font-black uppercase tracking-wider ring-1 ring-inset ${getBadgeClass(property.status)}`}>
-                  {property.statusText}
-                </span>
-                <span className="text-xs font-bold text-slate-400 dark:text-slate-500">{property.distance}</span>
-              </div>
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20 gap-4">
+              <span className="material-symbols-outlined text-4xl text-primary animate-spin">progress_activity</span>
+              <p className="text-slate-500 font-medium">Carregando imóveis...</p>
             </div>
-          ))}
+          ) : error ? (
+            <div className="bg-red-50 p-4 rounded-xl text-red-600 text-center">
+              <p>Erro ao carregar imóveis: {error}</p>
+            </div>
+          ) : properties.length === 0 ? (
+            <div className="text-center py-20 text-slate-500">
+              <p>Nenhum imóvel encontrado.</p>
+            </div>
+          ) : (
+            properties.map((property) => (
+              <div
+                key={property.id}
+                onClick={() => onSelectProperty(property)}
+                className={`group relative flex flex-col gap-2 rounded-2xl bg-white dark:bg-surface-dark p-5 shadow-sm border border-slate-100 dark:border-transparent active:scale-[0.98] transition-all cursor-pointer overflow-hidden`}
+              >
+                {property.status === 'active' && <div className="absolute top-0 left-0 w-1 h-full bg-red-500"></div>}
+                <div className="flex justify-between items-start">
+                  <div className="flex items-center gap-4">
+                    <div className={`flex size-12 shrink-0 items-center justify-center rounded-xl ${getStatusColorClass(property.status)} shadow-sm`}>
+                      <span className="material-symbols-outlined text-[28px]">{property.status === 'active' ? 'warning' : getIcon(property.type)}</span>
+                    </div>
+                    <div>
+                      <h3 className="text-base font-bold text-slate-900 dark:text-white leading-tight">{property.name}</h3>
+                      <p className="text-sm text-slate-500 dark:text-text-secondary-dark mt-1 flex items-center gap-1">
+                        <span className="material-symbols-outlined text-xs">location_on</span>
+                        {property.address}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="material-symbols-outlined text-slate-300 dark:text-slate-600">arrow_forward_ios</span>
+                </div>
+                <div className="flex items-center gap-2 mt-2 pl-16">
+                  <span className={`inline-flex items-center rounded-lg px-2.5 py-1 text-[10px] font-black uppercase tracking-wider ring-1 ring-inset ${getBadgeClass(property.status)}`}>
+                    {property.statusText}
+                  </span>
+                  <span className="text-xs font-bold text-slate-400 dark:text-slate-500">{property.distance || '---'}</span>
+                </div>
+              </div>
+            ))
+          )}
           <div className="h-10"></div>
         </div>
       </main>

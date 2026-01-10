@@ -11,6 +11,13 @@ export interface Property {
   id: string;
   name: string;
   address: string;
+  neighborhood?: string;
+  city?: string;
+  state?: string;
+  cep?: string;
+  owner?: string;
+  built_area?: number;
+  land_area?: number;
   status: 'active' | 'pending' | 'normal' | 'inactive';
   statusText: string;
   distance: string;
